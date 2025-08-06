@@ -19,6 +19,10 @@ from reportlab.lib.colors import black, blue, HexColor, lightgrey
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
+from flask_migrate import Migrate
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # IMPORTANT: Ensure this line is present and correct at the very top of your file
 from werkzeug.security import generate_password_hash, check_password_hash 
@@ -37,11 +41,13 @@ REPORT_FOLDER = 'reports'
 app.config['REPORT_FOLDER'] = REPORT_FOLDER
 
 # --- Database Configuration (SQLite) ---
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://user:password@host/dbname'
+# Use the live DATABASE_URL if it's available, otherwise use local SQLite
+database_uri = os.environ.get('DATABASE_URL') or 'sqlite:///football_reports.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
-
+migrate = Migrate(app, db)
 # --- Flask-Login Setup ---
 login_manager = LoginManager()
 login_manager.init_app(app)
