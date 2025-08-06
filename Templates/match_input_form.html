@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Match Report Generator{% endblock %}
+
+{% block content_heading %}
+    <h1>Match Report Generator</h1>
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('generate_match_report') if not match else url_for('edit_match', match_id=match.id) }}" method="post" enctype="multipart/form-data">
+        
+        <input type="hidden" name="report_type_choice" value="{{ report_type_choice }}">
+
+        <div class="form-section">
+            <h2>Match Details</h2>
+            <div class="form-group">
+                <label for="competition">Competition:</label>
+                <select id="competition" name="competition">
+                    <option value="">Select Competition</option>
+                    <option value="League" {% if ((form_data.competition if form_data else match.competition) if match or form_data else '') == 'League' %}selected{% endif %}>League</option>
+                    <option value="Cup" {% if ((form_data.competition if form_data else match.competition) if match or form_data else '') == 'Cup' %}selected{% endif %}>Cup</option>
+                    <option value="Friendly" {% if ((form_data.competition if form_data else match.competition) if match or form_data else '') == 'Friendly' %}selected{% endif %}>Friendly</option>
+                    <option value="Other" {% if ((form_data.competition if form_data else match.competition) if match or form_data else '') == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="season">Season:</label>
+                <input type="text" id="season" name="season" value="{{ (form_data.season if form_data else match.season) if match or form_data else '' }}" placeholder="e.g., 2024/2025">
+            </div>
+            <div class="form-group">
+                <label for="match_date">Match Date:</label>
+                <input type="date" id="match_date" name="match_date" value="{{ (form_data.match_date if form_data else match.match_date) if match or form_data else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="venue">Venue:</label>
+                <input type="text" id="venue" name="venue" value="{{ (form_data.venue if form_data else match.venue) if match or form_data else '' }}" placeholder="e.g., Old Trafford">
+            </div>
+            <div class="form-group">
+                <label for="weather_pitch_conditions">Weather/Pitch Conditions (Optional):</label>
+                <textarea id="weather_pitch_conditions" name="weather_pitch_conditions" rows="3" placeholder="e.g., Rainy, muddy pitch">{{ (form_data.weather_pitch_conditions if form_data else match.weather_pitch_conditions) if match or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="home_team">Home Team Name:</label>
+                <input type="text" id="home_team" name="home_team" value="{{ (form_data.home_team if form_data else match.home_team) if match or form_data else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="away_team">Away Team Name:</label>
+                <input type="text" id="away_team" name="away_team" value="{{ (form_data.away_team if form_data else match.away_team) if match or form_data else '' }}" required>
+            </div>
+            <div class="form-group">
+                <label for="final_score_home">Final Score (Home):</label>
+                <input type="number" id="final_score_home" name="final_score_home" value="{{ (form_data.final_score_home if form_data else match.final_score_home) if match or form_data else '' }}" min="0">
+            </div>
+            <div class="form-group">
+                <label for="final_score_away">Final Score (Away):</label>
+                <input type="number" id="final_score_away" name="final_score_away" value="{{ (form_data.final_score_away if form_data else match.final_score_away) if match or form_data else '' }}" min="0">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Team & Player Setup</h2>
+            <div class="form-group">
+                <label for="home_formation_initial">Home Team Formation (Initial):</label>
+                <select id="home_formation_initial" name="home_formation_initial">
+                    <option value="">Select Formation</option>
+                    <option value="4-3-3" {% if ((form_data.home_formation_initial if form_data else match.home_formation_initial) if match or form_data else '') == '4-3-3' %}selected{% endif %}>4-3-3</option>
+                    <option value="4-4-2" {% if ((form_data.home_formation_initial if form_data else match.home_formation_initial) if match or form_data else '') == '4-4-2' %}selected{% endif %}>4-4-2</option>
+                    <option value="3-5-2" {% if ((form_data.home_formation_initial if form_data else match.home_formation_initial) if match or form_data else '') == '3-5-2' %}selected{% endif %}>3-5-2</option>
+                    <option value="4-2-3-1" {% if ((form_data.home_formation_initial if form_data else match.home_formation_initial) if match or form_data else '') == '4-2-3-1' %}selected{% endif %}>4-2-3-1</option>
+                    <option value="Other" {% if ((form_data.home_formation_initial if form_data else match.home_formation_initial) if match or form_data else '') == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="away_formation_initial">Away Team Formation (Initial):</label>
+                <select id="away_formation_initial" name="away_formation_initial">
+                    <option value="">Select Formation</option>
+                    <option value="4-3-3" {% if ((form_data.away_formation_initial if form_data else match.away_formation_initial) if match or form_data else '') == '4-3-3' %}selected{% endif %}>4-3-3</option>
+                    <option value="4-4-2" {% if ((form_data.away_formation_initial if form_data else match.away_formation_initial) if match or form_data else '') == '4-4-2' %}selected{% endif %}>4-4-2</option>
+                    <option value="3-5-2" {% if ((form_data.away_formation_initial if form_data else match.away_formation_initial) if match or form_data else '') == '3-5-2' %}selected{% endif %}>3-5-2</option>
+                    <option value="4-2-3-1" {% if ((form_data.away_formation_initial if form_data else match.away_formation_initial) if match or form_data else '') == '4-2-3-1' %}selected{% endif %}>4-2-3-1</option>
+                    <option value="Other" {% if ((form_data.away_formation_initial if form_data else match.away_formation_initial) if match or form_data else '') == 'Other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="home_lineup_notes">Home Team Lineup Notes:</label>
+                <textarea id="home_lineup_notes" name="home_lineup_notes" rows="4" placeholder="List starters, subs, key tactical roles for home team">{{ (form_data.home_lineup_notes if form_data else match.home_lineup_notes) if match or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="away_lineup_notes">Away Team Lineup Notes:</label>
+                <textarea id="away_lineup_notes" name="away_lineup_notes" rows="4" placeholder="List starters, subs, key tactical roles for away team">{{ (form_data.away_lineup_notes if form_data else match.away_lineup_notes) if match or form_data else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Deep Tactical Analysis</h2>
+            <h3>Home Team Tactical Breakdown:</h3>
+            <div class="form-group">
+                <label for="home_attacking_phase">Attacking Phase (In Possession):</label>
+                <textarea id="home_attacking_phase" name="home_attacking_phase" rows="4" placeholder="Analysis of home team's offensive strategies">{{ (form_data.home_attacking_phase if form_data else match.home_attacking_phase) if match or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="home_defensive_phase">Defensive Phase (Out of Possession):</label>
+                <textarea id="home_defensive_phase" name="home_defensive_phase" rows="4" placeholder="Analysis of home team's defensive strategies">{{ (form_data.home_defensive_phase if form_data else match.home_defensive_phase) if match or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="home_key_transitions">Key Transitions:</label>
+                <textarea id="home_key_transitions" name="home_key_transitions" rows="4" placeholder="How well did home team transition from defense to attack and vice-versa?">{{ (form_data.home_key_transitions if form_data else match.home_key_transitions) if match or form_data else '' }}</textarea>
+            </div>
+            
+            <h3>Away Team Tactical Breakdown:</h3>
+            <div class="form-group">
+                <label for="away_attacking_phase">Attacking Phase (In Possession):</label>
+                <textarea id="away_attacking_phase" name="away_attacking_phase" rows="4" placeholder="Analysis of away team's offensive strategies">{{ (form_data.away_attacking_phase if form_data else match.away_attacking_phase) if match or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="away_defensive_phase">Defensive Phase (Out of Possession):</label>
+                <textarea id="away_defensive_phase" name="away_defensive_phase" rows="4" placeholder="Analysis of away team's defensive strategies">{{ (form_data.away_defensive_phase if form_data else match.away_defensive_phase) if match or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="away_key_transitions">Key Transitions:</label>
+                <textarea id="away_key_transitions" name="away_key_transitions" rows="4" placeholder="How well did away team transition from defense to attack and vice-versa?">{{ (form_data.away_key_transitions if form_data else match.away_key_transitions) if match or form_data else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Conclusive Summary</h2>
+            <div class="form-group">
+                <label for="overall_match_summary">Overall Match Summary:</label>
+                <textarea id="overall_match_summary" name="overall_match_summary" rows="4" placeholder="A comprehensive summary of the match flow and result">{{ (form_data.overall_match_summary if form_data else match.overall_match_summary) if match or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="key_turning_points">Key Turning Point(s):</label>
+                <textarea id="key_turning_points" name="key_turning_points" rows="4" placeholder="Crucial moments that changed the game's dynamic">{{ (form_data.key_turning_points if form_data else match.key_turning_points) if match or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="man_of_the_match">Man of the Match:</label>
+                <input type="text" id="man_of_the_match" name="man_of_the_match" value="{{ (form_data.man_of_the_match if form_data else match.man_of_the_match) if match or form_data else '' }}" placeholder="Player's Name (e.g., Lionel Messi)">
+            </div>
+            <div class="form-group">
+                <label for="final_analyst_notes">Final Analyst Notes:</label>
+                <textarea id="final_analyst_notes" name="final_analyst_notes" rows="4" placeholder="Additional insights, recommendations, or future considerations">{{ (form_data.final_analyst_notes if form_data else match.final_analyst_notes) if match or form_data else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Club Logo (Optional)</h2>
+            <div class="form-group">
+                <label for="club_logo">Upload Logo (PNG/JPG):</label>
+                <input type="file" id="club_logo" name="club_logo" accept="image/png, image/jpeg">
+                {% if match and match.pdf_report_path %}
+                <small>Note: Uploading a new logo will replace the previous one for this report.</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button type="submit">{{ 'Update Match Report' if match else 'Generate Match Report' }}</button>
+        </div>
+    </form>
+{% endblock %}

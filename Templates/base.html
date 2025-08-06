@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Football Report App{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        {% if current_user.is_authenticated %}
+        <span>Logged in as: <strong>{{ current_user.username }}</strong> ({{ current_user.club.name }})</span>
+        <a href="{{ url_for('select_report_type') }}">Create Report</a> {# Direct link to report type selection #}
+        <a href="{{ url_for('list_players') }}">Player Reports</a>
+        <a href="{{ url_for('list_matches') }}">Match Reports</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+        {% endif %}
+    </header>
+
+    <div class="container">
+        {% block content_heading %}{% endblock %} {# Placeholder for main heading #}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="messages">
+            {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %} {# Main content block for other templates #}
+    </div>
+</body>
+</html>

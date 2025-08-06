@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Player Report Generator{% endblock %}
+
+{% block content_heading %}
+    <h1>Player Performance Report Generator</h1>
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('generate_player_report') if not player else url_for('edit_player', player_id=player.id) }}" method="post" enctype="multipart/form-data">
+        
+        <input type="hidden" name="report_type_choice" value="{{ report_type_choice }}">
+
+        <div class="form-section">
+            <h2>Player Vitals & Basic Information</h2>
+            <div class="form-group">
+                <label for="player_name">Player Name:</label>
+                <input type="text" id="player_name" name="player_name" value="{{ (form_data.player_name if form_data else player.player_name) if player or form_data else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="coach_name">Coach's Name:</label>
+                <input type="text" id="coach_name" name="coach_name" value="{{ (form_data.coach_name if form_data else player.coach_name) if player or form_data else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Player's Team:</label>
+                <input type="text" value="{{ current_user.club.name }}" disabled> 
+            </div>
+            <div class="form-group">
+                <label for="sub_team">Sub-Team / Age Group:</label>
+                <input type="text" id="sub_team" name="sub_team" value="{{ (form_data.sub_team if form_data else player.sub_team) if player or form_data else '' }}" placeholder="e.g., U15, U21, Reserves">
+            </div>
+            <div class="form-group">
+                <label for="jersey_number">Jersey Number:</label>
+                <input type="number" id="jersey_number" name="jersey_number" value="{{ (form_data.jersey_number if form_data else player.jersey_number) if player or form_data else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="position">Position:</label>
+                <input type="text" id="position" name="position" value="{{ (form_data.position if form_data else player.position) if player or form_data else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="dob">Date of Birth:</label>
+                <input type="date" id="dob" name="dob" value="{{ (form_data.dob if form_data else player.dob) if player or form_data else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="preferred_foot">Preferred Foot:</label>
+                <select id="preferred_foot" name="preferred_foot">
+                    <option value="Right" {% if ((form_data.preferred_foot if form_data else player.preferred_foot) if player or form_data else '') == 'Right' %}selected{% endif %}>Right</option>
+                    <option value="Left" {% if ((form_data.preferred_foot if form_data else player.preferred_foot) if player or form_data else '') == 'Left' %}selected{% endif %}>Left</option>
+                    <option value="Both" {% if ((form_data.preferred_foot if form_data else player.preferred_foot) if player or form_data else '') == 'Both' %}selected{% endif %}>Both</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="height">Height (cm):</label>
+                <input type="number" id="height" name="height" step="0.1" value="{{ (form_data.height if form_data else player.height) if player or form_data else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight (kg):</label>
+                <input type="number" id="weight" name="weight" step="0.1" value="{{ (form_data.weight if form_data else player.weight) if player or form_data else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="primary_positions">Primary Position(s) Played:</label>
+                <input type="text" id="primary_positions" name="primary_positions" value="{{ (form_data.primary_positions if form_data else player.primary_positions) if player or form_data else '' }}" placeholder="e.g., CM, CAM, RW">
+            </div>
+            <div class="form-group">
+                <label for="report_period_start">Report Period Start Date:</label>
+                <input type="date" id="report_period_start" name="report_period_start" value="{{ (form_data.report_period_start if form_data else player.report_period_start) if player or form_data else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="report_period_end">Report Period End Date:</label>
+                <input type="date" id="report_period_end" name="report_period_end" value="{{ (form_data.report_period_end if form_data else player.report_period_end) if player or form_data else '' }}">
+            </div>
+            <div class="form-group">
+                <label for="matches_covered">Matches Covered (Brief List):</label>
+                <textarea id="matches_covered" name="matches_covered" rows="3" placeholder="e.g., vs. Opponent A (W 3-1), vs. Opponent B (L 0-2)">{{ (form_data.matches_covered if form_data else player.matches_covered) if player or form_data else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Performance Snapshot (Objective Data)</h2>
+            <div class="form-group">
+                <label for="matches_played">Matches Played (Count):</label>
+                <input type="number" id="matches_played" name="matches_played" value="{{ (form_data.matches_played if form_data else player.matches_played) if player or form_data else '' }}" min="0">
+            </div>
+            <div class="form-group">
+                <label for="total_minutes_played">Total Minutes Played:</label>
+                <input type="number" id="total_minutes_played" name="total_minutes_played" value="{{ (form_data.total_minutes_played if form_data else player.total_minutes_played) if player or form_data else '' }}" min="0">
+            </div>
+            <div class="form-group">
+                <label for="goals">Goals:</label>
+                <input type="number" id="goals" name="goals" value="{{ (form_data.goals if form_data else player.goals) if player or form_data else '' }}" min="0">
+            </div>
+            <div class="form-group">
+                <label for="assists">Assists:</label>
+                <input type="number" id="assists" name="assists" value="{{ (form_data.assists if form_data else player.assists) if player or form_data else '' }}" min="0">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>4 Corners Assessment</h2>
+            <div class="form-group">
+                <label for="technical_tactical_notes">Technical / Tactical Notes:</label>
+                <textarea id="technical_tactical_notes" name="technical_tactical_notes" rows="6" placeholder="Assessment of ball control, passing, shooting, dribbling, positional play, decision-making, etc.">{{ (form_data.technical_tactical_notes if form_data else player.technical_tactical_notes) if player or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="physical_notes">Physical Notes:</label>
+                <textarea id="physical_notes" name="physical_notes" rows="6" placeholder="Assessment of speed, agility, strength, stamina, endurance, recovery, injury status.">{{ (form_data.physical_notes if form_data else player.physical_notes) if player or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="psychological_notes">Psychological Notes:</label>
+                <textarea id="psychological_notes" name="psychological_notes" rows="6" placeholder="Assessment of focus, motivation, confidence, composure, resilience, discipline, leadership.">{{ (form_data.psychological_notes if form_data else player.psychological_notes) if player or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="social_notes">Social Notes:</label>
+                <textarea id="social_notes" name="social_notes" rows="6" placeholder="Assessment of communication, teamwork, coachability, interaction with teammates/staff.">{{ (form_data.social_notes if form_data else player.social_notes) if player or form_data else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Development Summary & Action Plan</h2>
+            <div class="form-group">
+                <label for="overall_performance_summary">Overall Performance Summary:</label>
+                <textarea id="overall_performance_summary" name="overall_performance_summary" rows="4" placeholder="Comprehensive summary of player's performance">{{ (form_data.overall_performance_summary if form_data else player.overall_performance_summary) if player or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="key_strengths_exhibited">Key Strengths Exhibited:</label>
+                <textarea id="key_strengths_exhibited" name="key_strengths_exhibited" rows="4" placeholder="Specific areas where the player excelled">{{ (form_data.key_strengths_exhibited if form_data else player.key_strengths_exhibited) if player or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="primary_areas_development">Primary Areas for Development:</label>
+                <textarea id="primary_areas_development" name="primary_areas_development" rows="4" placeholder="Key aspects the player needs to improve">{{ (form_data.primary_areas_development if form_data else player.primary_areas_development) if player or form_data else '' }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="recommended_action_plan">Recommended Action Plan / Drills:</label>
+                <textarea id="recommended_action_plan" name="recommended_action_plan" rows="4" placeholder="Specific drills or training focus areas">{{ (form_data.recommended_action_plan if form_data else player.recommended_action_plan) if player or form_data else '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Club Logo (Optional)</h2>
+            <div class="form-group">
+                <label for="club_logo">Upload Logo (PNG/JPG):</label>
+                <input type="file" id="club_logo" name="club_logo" accept="image/png, image/jpeg">
+                {% if player and player.pdf_report_path %}
+                <small>Note: Uploading a new logo will replace the previous one for this report.</small>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button type="submit">{{ 'Update Report' if player else 'Generate PDF Report' }}</button>
+        </div>
+    </form>
+{% endblock %}

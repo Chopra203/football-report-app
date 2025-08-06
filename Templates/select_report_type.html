@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Select Report Type{% endblock %}
+
+{% block content_heading %}
+    <h1>What kind of report would you like to create?</h1>
+{% endblock %}
+
+{% block content %}
+    <div class="report-type-selection">
+        <a href="{{ url_for('create_player_report_form', report_type_choice='default_detailed_player_report') }}">Create Player Report</a>
+        <a href="{{ url_for('create_match_report_form', report_type_choice='default_match_report') }}">Create Match Report</a>
+    </div>
+{% endblock %}
